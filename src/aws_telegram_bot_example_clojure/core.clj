@@ -25,11 +25,13 @@
            (.format DateTimeFormatter/ISO_INSTANT)))
 
 (def version (delay
-   (-> (Class/forName (str handler-class-name))
-       (.getResourceAsStream "/project.clj")
-       slurp
-       read-string
-       (nth 2))))
+  (let [source (-> (Class/forName "com.vsubhuman.animalbot.Main")
+                  (.getResourceAsStream "/project.clj")
+                  slurp)
+       defproject (->> (read-string (str \( source \)))
+                       (filter #(= (first %) 'defproject))
+                       first)]
+   (nth defproject 2))))
 
 (deflambdafn handler-class-name
    [in out ctx]
